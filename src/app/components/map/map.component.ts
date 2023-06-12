@@ -15,6 +15,7 @@ export class MapComponent implements OnInit {
   width = 800;
   height = 600;
   path: GeoPath<any, GeoPermissibleObjects> | null = null;
+  currentHoveredFeature: any;
 
   constructor(private mapService: MapService) {}
 
@@ -43,6 +44,14 @@ export class MapComponent implements OnInit {
       .attr('d', (d: any) => this.path!(d) as string)
       .style('fill', 'steelblue')
       .style('stroke', 'white')
-      .style('stroke-width', '1px');
+      .style('stroke-width', '1px')
+      .on('mouseenter', (event: any, d: any) => {
+        this.currentHoveredFeature = d;
+        d3.select(event.target).style('fill', 'orange');
+      })
+      .on('mouseleave', (event: any, d: any) => {
+        this.currentHoveredFeature = null;
+        d3.select(event.target).style('fill', 'steelblue');
+      });
   }
 }

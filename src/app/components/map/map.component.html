@@ -1,3 +1,12 @@
 <svg id="mapSvg" [attr.width]="width" [attr.height]="height">
-  <path *ngFor="let feature of mapData?.features" [attr.d]="path?.(feature)"></path>
+  <path *ngFor="let feature of mapData?.features"
+        [attr.d]="path?.(feature)"
+        [class]="{'hovered': feature === currentHoveredFeature}"
+        (mouseenter)="currentHoveredFeature = feature"
+        (mouseleave)="currentHoveredFeature = null"></path>
 </svg>
+
+<div *ngIf="currentHoveredFeature">
+  <h3>{{ currentHoveredFeature?.properties.name }}</h3>
+  <p>Population: {{ currentHoveredFeature?.properties?.pop_est }}</p>
+</div>
