@@ -16,6 +16,7 @@ export class MapComponent implements OnInit {
   height = 600;
   path: GeoPath<any, GeoPermissibleObjects> | null = null;
   currentHoveredFeature: any;
+  clickedFeatures: any[] = [];
 
   constructor(private mapService: MapService) {}
 
@@ -27,6 +28,14 @@ export class MapComponent implements OnInit {
     this.mapService.getMapData().subscribe((data: any) => {
       this.processData(data);
     });
+  }
+
+  toggleClickedFeature(feature: any): void {
+    if (this.clickedFeatures.includes(feature)) {
+      this.clickedFeatures = this.clickedFeatures.filter(clicked => clicked !== feature);
+    } else {
+      this.clickedFeatures.push(feature);
+    }
   }
 
   processData(data: any): void {
@@ -50,8 +59,27 @@ export class MapComponent implements OnInit {
         d3.select(event.target).style('fill', 'orange');
       })
       .on('mouseleave', (event: any, d: any) => {
-        this.currentHoveredFeature = null;
-        d3.select(event.target).style('fill', 'steelblue');
+        if (this.currentHoveredFeature !== d) {
+          this.currentHoveredFeature = null;
+          d3.select(event.target).style('fill', 'steelblue');
+        }
+      })
+      .on('click', (event: any, d: any) => {
+        if (this.clickedFeatures.includes(d)) {
+          this.clickedFeatures = this.clickedFeatures.filter(feature => feature !== d);
+          d3.select(event.target).style('fill', 'steelblue');
+        } else {
+          this.clickedFeatures.push(d);
+          d3.select(event.target).style('fill', 'purple');
+        }
+      })
+      .on('mouseleave', (event: any, d: any) => {
+        if (!this.clickedFeatures.includes(d)) {
+          this.currentHoveredFeature = null;
+        }
+        d3.select(event.target).style('fill', (d: any) => {
+          return this.clickedFeatures.includes(d) ? 'purple' : 'steelblue';
+        });
       });
   }
 }
