@@ -41,9 +41,7 @@ export class MapComponent implements OnInit {
   processData(data: any): void {
     this.mapData = data;
     const svg = d3.select('#mapSvg');
-
     const projection = d3.geoMercator().fitSize([this.width, this.height], this.mapData);
-
     this.path = geoPath().projection(projection);
 
     svg.selectAll('path')
@@ -51,35 +49,45 @@ export class MapComponent implements OnInit {
       .enter()
       .append('path')
       .attr('d', (d: any) => this.path!(d) as string)
-      .style('fill', 'steelblue')
+      .style('fill', (d: any) => this.getFeatureFillColor(d))
       .style('stroke', 'white')
       .style('stroke-width', '1px')
       .on('mouseenter', (event: any, d: any) => {
-        this.currentHoveredFeature = d;
-        d3.select(event.target).style('fill', 'orange');
+        this.handleMouseEnter(event, d);
       })
       .on('mouseleave', (event: any, d: any) => {
-        if (this.currentHoveredFeature !== d) {
-          this.currentHoveredFeature = null;
-          d3.select(event.target).style('fill', 'steelblue');
-        }
+        this.handleMouseLeave(event, d);
       })
       .on('click', (event: any, d: any) => {
-        if (this.clickedFeatures.includes(d)) {
-          this.clickedFeatures = this.clickedFeatures.filter(feature => feature !== d);
-          d3.select(event.target).style('fill', 'steelblue');
-        } else {
-          this.clickedFeatures.push(d);
-          d3.select(event.target).style('fill', 'purple');
-        }
-      })
-      .on('mouseleave', (event: any, d: any) => {
-        if (!this.clickedFeatures.includes(d)) {
-          this.currentHoveredFeature = null;
-        }
-        d3.select(event.target).style('fill', (d: any) => {
-          return this.clickedFeatures.includes(d) ? 'purple' : 'steelblue';
-        });
+        this.handleClick(event, d);
       });
   }
+
+  getFeatureFillColor(feature: any): string {
+    return this.clickedFeatures.includes(feature) ? 'purple' : 'steelblue';
+  }
+
+  handleMouseEnter(event: any, feature: any): void {
+    this.currentHoveredFeature = feature;
+    d3.select(event.target).style('fill', 'orange');
+  }
+
+  handleMouseLeave(event: any, feature: any): void {
+    if (!this.clickedFeatures.includes(feature)) {
+      this.currentHoveredFeature = null;
+    }
+    const fillColor = this.getFeatureFillColor(feature);
+    d3.select(event.target).style('fill', fillColor);
+  }
+
+  handleClick(event: any, feature: any): void {
+    if (this.clickedFeatures.includes(feature)) {
+      this.clickedFeatures = this.clickedFeatures.filter(f => f !== feature);
+    } else {
+      this.clickedFeatures.push(feature);
+    }
+    const fillColor = this.getFeatureFillColor(feature);
+    d3.select(event.target).style('fill', fillColor);
+  }
+
 }
