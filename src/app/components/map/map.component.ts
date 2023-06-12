@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
+
+import {MapService} from "../../services/map.service";
 
 @Component({
   selector: 'app-map',
@@ -13,17 +14,16 @@ export class MapComponent implements OnInit {
   mapData: any;
   width = 800;
   height = 600;
-  url = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson';
   path: GeoPath<any, GeoPermissibleObjects> | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private mapService: MapService) {}
 
   ngOnInit(): void {
     this.getMapData();
   }
 
   getMapData(): void {
-    this.http.get<any>(this.url).subscribe((data): void => {
+    this.mapService.getMapData().subscribe((data: any) => {
       this.processData(data);
     });
   }
