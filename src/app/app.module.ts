@@ -7,13 +7,15 @@ import { AuthComponent } from './features/auth/auth.component';
 import { MapComponent } from './components/map/map.component';
 import { HeaderComponent } from './components/header/header.component';
 import { HttpClientModule } from '@angular/common/http';
+import { TooltipComponent } from './components/tooltip/tooltip.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AuthComponent,
     MapComponent,
-    HeaderComponent
+    HeaderComponent,
+    TooltipComponent
   ],
   imports: [
     BrowserModule,

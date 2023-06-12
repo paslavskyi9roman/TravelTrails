@@ -11,3 +11,5 @@
   <h3>{{ currentHoveredFeature?.properties.name }}</h3>
   <p>Population: {{ currentHoveredFeature?.properties?.pop_est }}</p>
 </div>
+
+<app-tooltip [content]="currentHoveredFeature?.properties.name"></app-tooltip>
