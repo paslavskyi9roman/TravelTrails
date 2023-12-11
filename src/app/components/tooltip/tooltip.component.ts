@@ -7,7 +7,7 @@ import { Component, Input, HostListener } from '@angular/core';
   standalone: true,
 })
 export class TooltipComponent {
-  @Input() content: string | undefined;
+  @Input() content: string;
   isTooltipVisible = false;
 
   @HostListener('mouseenter')

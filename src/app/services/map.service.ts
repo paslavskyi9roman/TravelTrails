@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
-
-import { MapDataModel } from '../models/map-data.model';
-
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +10,7 @@ export class MapService {
 
   constructor(private http: HttpClient) { }
 
-  getMapData(): Observable<MapDataModel> {
-    return this.http.get<MapDataModel>(this.url);
+  getMapData(): Observable<any> {
+    return this.http.get<any>(this.url);
   }
 }

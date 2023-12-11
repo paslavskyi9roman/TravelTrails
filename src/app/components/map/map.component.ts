@@ -4,10 +4,6 @@ import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
 
 import { MapService } from "../../services/map.service";
-import { MapDataModel } from 'src/app/models/map-data.model';
-import { FeatureModel } from 'src/app/models/feature.model';
-
-
 
 @Component({
   selector: 'app-map',
@@ -17,23 +13,28 @@ import { FeatureModel } from 'src/app/models/feature.model';
 })
 export class MapComponent implements OnInit {
   mapData: any;
-  width = 1800;
-  height = 1200;
+  width = 800;
+  height = 600;
   path: GeoPath<any, GeoPermissibleObjects> | null = null;
-  currentHoveredFeature: FeatureModel | null;
-  selectedFeatures: Set<FeatureModel> = new Set();
+  currentHoveredFeature: any;
+  selectedFeatures: Set<any> = new Set();
 
   constructor(private mapService: MapService) { }
 
   ngOnInit(): void {
-    this.mapService.getMapData().subscribe((data: MapDataModel): void => {
+    this.getMapData();
+  }
+
+  getMapData(): void {
+    this.mapService.getMapData().subscribe((data: any) => {
       this.processData(data);
     });
   }
 
-  processData(data: MapDataModel): void {
-    this.mapData = data;
 
+
+  processData(data: any): void {
+    this.mapData = data;
     const svg = d3.select('#mapSvg');
     const projection = d3.geoMercator().fitSize([this.width, this.height], this.mapData);
     this.path = geoPath().projection(projection);
@@ -45,37 +46,34 @@ export class MapComponent implements OnInit {
       .style('fill', (d: any) => this.getFeatureFillColor(d))
       .style('stroke', 'white')
       .style('stroke-width', '1px')
-      .on('mouseenter', (event: any, d: any): void => {
+      .on('mouseenter', (event: any, d: any) => {
         this.handleMouseEnter(event, d);
       })
-      .on('mouseleave', (event: any, d: any): void => {
+      .on('mouseleave', (event: any, d: any) => {
         this.handleMouseLeave(event, d);
       })
-      .on('click', (event: any, d: any): void => {
+      .on('click', (event: any, d: any) => {
         this.handleClick(d, event);
       });
   }
 
-  getFeatureFillColor(feature: FeatureModel): string {
+  getFeatureFillColor(feature: any): string {
     return this.selectedFeatures.has(feature) ? 'purple' : 'steelblue';
   }
 
-  handleMouseEnter(event: MouseEvent, feature: FeatureModel): void {
-
+  handleMouseEnter(event: any, feature: any): void {
     this.currentHoveredFeature = feature;
-    d3.select(event.target as d3.BaseType).style('fill', 'orange');
+    d3.select(event.target).style('fill', 'orange');
   }
 
-  handleMouseLeave(event: MouseEvent, feature: FeatureModel): void {
-
+  handleMouseLeave(event: any, feature: any): void {
     if (!this.selectedFeatures.has(feature)) {
       this.currentHoveredFeature = null;
     }
-    this.updateFillColor(event.target as d3.BaseType, feature);
+    this.updateFillColor(event.target, feature);
   }
 
-  handleClick(event: MouseEvent, feature?: FeatureModel): void {
-
+  handleClick(event: any, feature?: any): void {
     this.toggleClickedFeature(feature);
     this.updateFillColor(event.target, feature);
   }
@@ -88,8 +86,8 @@ export class MapComponent implements OnInit {
     }
   }
 
-  updateFillColor(event: any, feature: any): void {
+  updateFillColor(element: any, feature: any): void {
     const fillColor = this.getFeatureFillColor(feature);
-    d3.select(event).style('fill', fillColor);
+    d3.select(element).style('fill', fillColor);
   }
 }
