@@ -4,9 +4,9 @@
       *ngFor="let feature of mapData?.features"
       [attr.d]="path?.(feature)"
       [class.hovered]="
-        feature === currentHoveredFeature && !clickedFeatures.includes(feature)
+        feature === currentHoveredFeature && !selectedFeatures.has(feature)
       "
-      [class.clicked]="clickedFeatures.includes(feature)"
+      [class.clicked]="selectedFeatures.has(feature)"
       (mouseenter)="currentHoveredFeature = feature"
       (click)="handleClick(feature)"
     ></path>
