@@ -1,41 +1,38 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
 
 import { MapService } from "../../services/map.service";
+import { FeatureModel } from 'src/app/models/feature.model';
+import { MapDataModel } from 'src/app/models/map-data.model';
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.scss']
+  styleUrls: ['./map.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+
 })
 export class MapComponent implements OnInit {
   mapData: any;
-  width = 800;
-  height = 600;
+  width = 1800;
+  height = 1200;
   path: GeoPath<any, GeoPermissibleObjects> | null = null;
-  currentHoveredFeature: any;
-  clickedFeatures: any[] = [];
+  currentHoveredFeature: FeatureModel | null;
+  selectedFeatures: Set<FeatureModel> = new Set();
 
-  constructor(private mapService: MapService) { }
+  constructor(private mapService: MapService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.getMapData();
   }
 
   getMapData(): void {
-    this.mapService.getMapData().subscribe((data: any) => {
+    this.mapService.getMapData().subscribe((data: MapDataModel): void => {
       this.processData(data);
-    });
-  }
 
-  toggleClickedFeature(feature: any): void {
-    if (this.clickedFeatures.includes(feature)) {
-      this.clickedFeatures = this.clickedFeatures.filter(clicked => clicked !== feature);
-    } else {
-      this.clickedFeatures.push(feature);
-    }
+    });
   }
 
   processData(data: any): void {
@@ -64,16 +61,17 @@ export class MapComponent implements OnInit {
   }
 
   getFeatureFillColor(feature: any): string {
-    return this.clickedFeatures.includes(feature) ? 'purple' : 'steelblue';
+    return this.selectedFeatures.has(feature) ? 'purple' : 'steelblue';
   }
 
   handleMouseEnter(event: any, feature: any): void {
     this.currentHoveredFeature = feature;
     d3.select(event.target).style('fill', 'orange');
+    this.cd.detectChanges();
   }
 
   handleMouseLeave(event: any, feature: any): void {
-    if (!this.clickedFeatures.includes(feature)) {
+    if (!this.selectedFeatures.has(feature)) {
       this.currentHoveredFeature = null;
     }
     const fillColor = this.getFeatureFillColor(feature);
@@ -81,10 +79,11 @@ export class MapComponent implements OnInit {
   }
 
   handleClick(event: any, feature: any): void {
-    if (this.clickedFeatures.includes(feature)) {
-      this.clickedFeatures = this.clickedFeatures.filter(f => f !== feature);
+    if (this.selectedFeatures.has(feature)) {
+      this.selectedFeatures.delete(feature);
     } else {
-      this.clickedFeatures.push(feature);
+      this.selectedFeatures.add(feature);
+
     }
     const fillColor = this.getFeatureFillColor(feature);
     d3.select(event.target).style('fill', fillColor);
