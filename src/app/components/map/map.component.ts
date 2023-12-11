@@ -16,7 +16,7 @@ export class MapComponent implements OnInit {
   height = 600;
   path: GeoPath<any, GeoPermissibleObjects> | null = null;
   currentHoveredFeature: any;
-  selectedFeatures: Set<any> = new Set();
+  clickedFeatures: any[] = [];
 
   constructor(private mapService: MapService) { }
 
@@ -40,7 +40,8 @@ export class MapComponent implements OnInit {
 
     svg.selectAll('path')
       .data(this.mapData.features)
-      .join('path')
+      .enter()
+      .append('path')
       .attr('d', (d: any) => this.path!(d) as string)
       .style('fill', (d: any) => this.getFeatureFillColor(d))
       .style('stroke', 'white')
@@ -57,7 +58,7 @@ export class MapComponent implements OnInit {
   }
 
   getFeatureFillColor(feature: any): string {
-    return this.selectedFeatures.has(feature) ? 'purple' : 'steelblue';
+    return this.clickedFeatures.includes(feature) ? 'purple' : 'steelblue';
   }
 
   handleMouseEnter(event: any, feature: any): void {
@@ -66,7 +67,7 @@ export class MapComponent implements OnInit {
   }
 
   handleMouseLeave(event: any, feature: any): void {
-    if (!this.selectedFeatures.has(feature)) {
+    if (!this.clickedFeatures.includes(feature)) {
       this.currentHoveredFeature = null;
     }
     this.updateFillColor(event.target, feature);
@@ -78,10 +79,10 @@ export class MapComponent implements OnInit {
   }
 
   toggleClickedFeature(feature: any): void {
-    if (this.selectedFeatures.has(feature)) {
-      this.selectedFeatures.delete(feature);
+    if (this.clickedFeatures.includes(feature)) {
+      this.clickedFeatures = this.clickedFeatures.filter(clicked => clicked !== feature);
     } else {
-      this.selectedFeatures.add(feature);
+      this.clickedFeatures.push(feature);
     }
   }
 
