@@ -30,13 +30,7 @@ export class MapComponent implements OnInit {
     });
   }
 
-  toggleClickedFeature(feature: any): void {
-    if (this.clickedFeatures.includes(feature)) {
-      this.clickedFeatures = this.clickedFeatures.filter(clicked => clicked !== feature);
-    } else {
-      this.clickedFeatures.push(feature);
-    }
-  }
+
 
   processData(data: any): void {
     this.mapData = data;
@@ -59,7 +53,7 @@ export class MapComponent implements OnInit {
         this.handleMouseLeave(event, d);
       })
       .on('click', (event: any, d: any) => {
-        this.handleClick(event, d);
+        this.handleClick(d, event);
       });
   }
 
@@ -76,18 +70,24 @@ export class MapComponent implements OnInit {
     if (!this.clickedFeatures.includes(feature)) {
       this.currentHoveredFeature = null;
     }
-    const fillColor = this.getFeatureFillColor(feature);
-    d3.select(event.target).style('fill', fillColor);
+    this.updateFillColor(event.target, feature);
   }
 
-  handleClick(event: any, feature: any): void {
+  handleClick(event: any, feature?: any): void {
+    this.toggleClickedFeature(feature);
+    this.updateFillColor(event.target, feature);
+  }
+
+  toggleClickedFeature(feature: any): void {
     if (this.clickedFeatures.includes(feature)) {
-      this.clickedFeatures = this.clickedFeatures.filter(f => f !== feature);
+      this.clickedFeatures = this.clickedFeatures.filter(clicked => clicked !== feature);
     } else {
       this.clickedFeatures.push(feature);
     }
-    const fillColor = this.getFeatureFillColor(feature);
-    d3.select(event.target).style('fill', fillColor);
   }
 
+  updateFillColor(element: any, feature: any): void {
+    const fillColor = this.getFeatureFillColor(feature);
+    d3.select(element).style('fill', fillColor);
+  }
 }
