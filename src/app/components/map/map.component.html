@@ -1,4 +1,4 @@
-<div class="map">
+<section class="map">
   <svg id="mapSvg" [attr.width]="width" [attr.height]="height">
     <path
       *ngFor="let feature of mapData?.features; let i = index"
@@ -13,19 +13,24 @@
     ></path>
   </svg>
 
-  <app-tooltip [content]="currentHoveredFeature?.properties?.name" />
+  <!-- <app-tooltip [content]="currentHoveredFeature?.properties?.name" /> -->
 
-  <div *ngIf="currentHoveredFeature">
+  @if(currentHoveredFeature) {
+  <div class="map__info">
     <h3>{{ currentHoveredFeature.properties.name }}</h3>
     <p>Population: {{ currentHoveredFeature.properties.pop_est }}</p>
   </div>
+  }
 
-  <div>
+  <div class="map__selected-countries">
     <h4>Selected Countries:</h4>
     <ul>
-      <li *ngFor="let selectedFeature of selectedFeatures">
+      @for (selectedFeature of selectedFeatures; track
+      selectedFeature.properties.woe_id) {
+      <li>
         {{ selectedFeature.properties.name }}
       </li>
+      }
     </ul>
   </div>
-</div>
+</section>
