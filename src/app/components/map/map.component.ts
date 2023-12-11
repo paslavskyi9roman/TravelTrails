@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
 
-import {MapService} from "../../services/map.service";
+import { MapService } from "../../services/map.service";
 
 @Component({
   selector: 'app-map',
@@ -18,7 +18,7 @@ export class MapComponent implements OnInit {
   currentHoveredFeature: any;
   clickedFeatures: any[] = [];
 
-  constructor(private mapService: MapService) {}
+  constructor(private mapService: MapService) { }
 
   ngOnInit(): void {
     this.getMapData();

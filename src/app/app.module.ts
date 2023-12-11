@@ -15,12 +15,12 @@ import { TooltipComponent } from './components/tooltip/tooltip.component';
     AuthComponent,
     MapComponent,
     HeaderComponent,
-    TooltipComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    TooltipComponent,
   ],
   providers: [],
   bootstrap: [AppComponent]
