@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
@@ -8,8 +8,7 @@ import { MapService } from "../../services/map.service";
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./map.component.scss']
 })
 export class MapComponent implements OnInit {
   mapData: any;
