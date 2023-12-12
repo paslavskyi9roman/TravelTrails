@@ -1,5 +1,8 @@
 @if(showModal()) {
 <div class="modal" [style.left.px]="eventPos().x" [style.top.px]="eventPos().y">
-  modal content
+  <div class="map__info">
+    <h3>{{ data.properties.name }}</h3>
+    <p>Population: {{ data.properties.pop_est }}</p>
+  </div>
 </div>
 }

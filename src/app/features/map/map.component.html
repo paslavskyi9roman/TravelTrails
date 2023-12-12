@@ -15,13 +15,6 @@
 
   <!-- <app-tooltip [content]="currentHoveredFeature?.properties?.name" /> -->
 
-  @if(currentHoveredFeature) {
-  <div class="map__info">
-    <h3>{{ currentHoveredFeature.properties.name }}</h3>
-    <p>Population: {{ currentHoveredFeature.properties.pop_est }}</p>
-  </div>
-  }
-
   <app-selected-countries [selectedCountries]="selectedFeatures" />
-  <app-modal [showModal]="showmodal" [eventPos]="eventPos"/>
+  <app-modal [showModal]="showmodal" [eventPos]="eventPos" [data]="currentHoveredFeature"/>
 </section>
