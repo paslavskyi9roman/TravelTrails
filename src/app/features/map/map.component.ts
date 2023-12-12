@@ -1,4 +1,10 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  signal,
+} from '@angular/core';
 
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
@@ -11,8 +17,7 @@ import { MapService } from 'src/app/services/map.service';
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
-
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MapComponent implements OnInit {
   mapData: any;
@@ -21,8 +26,10 @@ export class MapComponent implements OnInit {
   path: GeoPath<any, GeoPermissibleObjects> | null = null;
   currentHoveredFeature: FeatureModel | null;
   selectedFeatures: Set<FeatureModel> = new Set();
+  showmodal = signal(false);
+  eventPos = signal({x: 0, y: 0})
 
-  constructor(private mapService: MapService, private cd: ChangeDetectorRef) { }
+  constructor(private mapService: MapService, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.getMapData();
@@ -31,17 +38,19 @@ export class MapComponent implements OnInit {
   getMapData(): void {
     this.mapService.getMapData().subscribe((data: MapDataModel): void => {
       this.processData(data);
-
     });
   }
 
   processData(data: any): void {
     this.mapData = data;
     const svg = d3.select('#mapSvg');
-    const projection = d3.geoMercator().fitSize([this.width, this.height], this.mapData);
+    const projection = d3
+      .geoMercator()
+      .fitSize([this.width, this.height], this.mapData);
     this.path = geoPath().projection(projection);
 
-    svg.selectAll('path')
+    svg
+      .selectAll('path')
       .data(this.mapData.features)
       .enter()
       .append('path')
@@ -68,6 +77,12 @@ export class MapComponent implements OnInit {
     this.currentHoveredFeature = feature;
     d3.select(event.target).style('fill', 'orange');
     this.cd.detectChanges();
+    this.eventPos.set({
+      x: event.clientX,
+      y: event.clientY,
+    })
+    
+    this.showmodal.set(true);
   }
 
   handleMouseLeave(event: any, feature: any): void {
@@ -76,6 +91,7 @@ export class MapComponent implements OnInit {
     }
     const fillColor = this.getFeatureFillColor(feature);
     d3.select(event.target).style('fill', fillColor);
+    this.showmodal.set(false);
   }
 
   handleClick(event: any, feature: any): void {
@@ -83,10 +99,8 @@ export class MapComponent implements OnInit {
       this.selectedFeatures.delete(feature);
     } else {
       this.selectedFeatures.add(feature);
-
     }
     const fillColor = this.getFeatureFillColor(feature);
     d3.select(event.target).style('fill', fillColor);
   }
-
 }

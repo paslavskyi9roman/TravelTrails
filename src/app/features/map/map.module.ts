@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 
 import { MapComponent } from './map.component';
 import { SelectedCountriesComponent } from './components/selected-countries/selected-countries.component';
+import { ModalComponent } from './components/modal/modal.component';
 
 @NgModule({
   declarations: [MapComponent],
   imports: [
-    CommonModule, SelectedCountriesComponent,
+    CommonModule, SelectedCountriesComponent, ModalComponent,
   ],
   exports: [MapComponent]
 })
