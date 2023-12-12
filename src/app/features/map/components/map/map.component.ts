@@ -3,7 +3,7 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
 
-import { MapService } from "../../services/map.service";
+import { MapService } from "../../../../services/map.service";
 import { FeatureModel } from 'src/app/models/feature.model';
 import { MapDataModel } from 'src/app/models/map-data.model';
 
