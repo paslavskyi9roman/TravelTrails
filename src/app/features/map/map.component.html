@@ -22,15 +22,6 @@
   </div>
   }
 
-  <div class="map__selected-countries">
-    <h4>Selected Countries:</h4>
-    <ul>
-      @for (selectedFeature of selectedFeatures; track
-      selectedFeature.properties.woe_id) {
-      <li>
-        {{ selectedFeature.properties.name }}
-      </li>
-      }
-    </ul>
-  </div>
+  <app-selected-countries [selectedCountries]="selectedFeatures" />
+  
 </section>

@@ -1,5 +1,10 @@
 .map {
   display: flex;
+  border: 3px solid red;
+}
+
+#mapSvg {
+  border: 3px solid blue;
 }
 
 .hovered {

@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MapComponent } from 'src/app/features/map/components/map/map.component';
+
+import { MapComponent } from './map.component';
+import { SelectedCountriesComponent } from './components/selected-countries/selected-countries.component';
 
 @NgModule({
   declarations: [MapComponent],
   imports: [
-    CommonModule,
+    CommonModule, SelectedCountriesComponent,
   ],
   exports: [MapComponent]
 })
