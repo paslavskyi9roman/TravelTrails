@@ -27,7 +27,7 @@ export class MapComponent implements OnInit {
   currentHoveredFeature: FeatureModel | null;
   selectedFeatures: Set<FeatureModel> = new Set();
   showmodal = signal(false);
-  eventPos = signal({x: 0, y: 0})
+  eventPos = signal({ x: 0, y: 0 });
 
   constructor(private mapService: MapService, private cd: ChangeDetectorRef) {}
 
@@ -80,8 +80,8 @@ export class MapComponent implements OnInit {
     this.eventPos.set({
       x: event.clientX,
       y: event.clientY,
-    })
-    
+    });
+
     this.showmodal.set(true);
   }
 
