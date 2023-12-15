@@ -28,6 +28,7 @@ export class MapComponent implements OnInit {
   selectedFeatures: Set<FeatureModel> = new Set();
   showmodal = signal(false);
   eventPos = signal({ x: 0, y: 0 });
+  private previousHoveredFeature: FeatureModel;
 
   constructor(private mapService: MapService, private cd: ChangeDetectorRef) {}
 
@@ -69,23 +70,26 @@ export class MapComponent implements OnInit {
       });
   }
 
-  getFeatureFillColor(feature: any): string {
+  getFeatureFillColor(feature: FeatureModel): string {
     return this.selectedFeatures.has(feature) ? 'purple' : 'steelblue';
   }
 
-  handleMouseEnter(event: any, feature: any): void {
+  handleMouseEnter(event: any, feature: FeatureModel): void {
+    if (this.previousHoveredFeature !== feature) {
+      this.currentHoveredFeature = feature;
+      this.previousHoveredFeature = feature;
+    }
     this.currentHoveredFeature = feature;
     d3.select(event.target).style('fill', 'orange');
-    this.cd.detectChanges();
     this.eventPos.set({
       x: event.clientX,
       y: event.clientY,
     });
-
+    this.cd.detectChanges();
     this.showmodal.set(true);
   }
 
-  handleMouseLeave(event: any, feature: any): void {
+  handleMouseLeave(event: any, feature: FeatureModel): void {
     if (!this.selectedFeatures.has(feature)) {
       this.currentHoveredFeature = null;
     }
@@ -94,7 +98,7 @@ export class MapComponent implements OnInit {
     this.showmodal.set(false);
   }
 
-  handleClick(event: any, feature: any): void {
+  handleClick(event: any, feature: FeatureModel): void {
     if (this.selectedFeatures.has(feature)) {
       this.selectedFeatures.delete(feature);
     } else {
@@ -102,5 +106,9 @@ export class MapComponent implements OnInit {
     }
     const fillColor = this.getFeatureFillColor(feature);
     d3.select(event.target).style('fill', fillColor);
+  }
+
+  isHovered(feature: FeatureModel): boolean {
+    return feature === this.currentHoveredFeature && !this.selectedFeatures.has(feature);
   }
 }
