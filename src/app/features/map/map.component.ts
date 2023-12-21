@@ -145,6 +145,8 @@ export class MapComponent implements OnInit {
     this.selectedFeatures = new Set();
     this.mapService.getMapData().subscribe((data: MapDataModel): void => {
       this.processData(data);
+      const svg = d3.select('#mapSvg');
+      svg.selectAll('path').style('fill', 'steelblue');
     });
   }
 }
