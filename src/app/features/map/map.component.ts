@@ -44,7 +44,7 @@ export class MapComponent implements OnInit {
       this.processData(data);
       this.route.queryParams.subscribe((params) => {
         const sharedCountries = params['selectedCountries'];
-  
+
         if (sharedCountries) {
           const featureIds = sharedCountries.split(',');
           this.selectedFeatures = new Set(
@@ -56,9 +56,7 @@ export class MapComponent implements OnInit {
             this.selectedFeatures,
           );
           console.log('init with selected countries');
-          
-          
-        } 
+        }
       });
     });
   }
@@ -138,6 +136,7 @@ export class MapComponent implements OnInit {
     }
     const fillColor = this.getFeatureFillColor(feature);
     d3.select(event.target).style('fill', fillColor);
+    this.cd.detectChanges();
   }
 
   isHovered(feature: FeatureModel): boolean {
