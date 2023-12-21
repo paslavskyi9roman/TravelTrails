@@ -5,8 +5,10 @@ import {
   ChangeDetectorRef,
   signal,
   inject,
+  DestroyRef,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
@@ -30,41 +32,42 @@ export class MapComponent implements OnInit {
   selectedFeatures: Set<FeatureModel> = new Set();
   showmodal = signal(false);
   eventPos = signal({ x: 0, y: 0 });
-  private previousHoveredFeature: FeatureModel;
-  private mapService = inject(MapService);
-  private cd = inject(ChangeDetectorRef);
-  private route = inject(ActivatedRoute);
+  private mapService: MapService = inject(MapService);
+  private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private route: ActivatedRoute = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     this.getMapData();
   }
 
   getMapData(): void {
-    this.mapService.getMapData().subscribe((data: MapDataModel): void => {
-      this.processData(data);
-      this.route.queryParams.subscribe((params) => {
-        const sharedCountries = params['selectedCountries'];
+    this.mapService
+      .getMapData()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((data: MapDataModel): void => {
+        this.processData(data);
+        this.route.queryParams.subscribe((params: Params): void => {
+          const sharedCountries = params['selectedCountries'];
 
-        if (sharedCountries) {
-          const featureIds = sharedCountries.split(',');
-          this.selectedFeatures = new Set(
-            this.mapData.features.filter((feature: FeatureModel) =>
-              featureIds.includes(feature.properties.name),
-            ),
-          );
+          if (sharedCountries) {
+            const featureIds = sharedCountries.split(',');
+            this.selectedFeatures = new Set(
+              this.mapData.features.filter((feature: FeatureModel) =>
+                featureIds.includes(feature.properties.name),
+              ),
+            );
 
-          this.highlightSelectedFeatures();
-        }
+            this.highlightSelectedFeatures();
+          }
+        });
       });
-    });
   }
-
-
 
   processData(data: MapDataModel): void {
     this.mapData = data;
     const svg = d3.select('#mapSvg');
-    const projection = d3
+    const projection: d3.GeoProjection = d3
       .geoMercator()
       .fitSize([this.width, this.height], this.mapData);
     this.path = geoPath().projection(projection);
@@ -78,13 +81,13 @@ export class MapComponent implements OnInit {
       .style('fill', (d: any) => this.getFeatureFillColor(d))
       .style('stroke', 'white')
       .style('stroke-width', '1px')
-      .on('mouseenter', (event: any, d: any) => {
+      .on('mouseenter', (event: any, d: any): void => {
         this.handleMouseEnter(event, d);
       })
-      .on('mouseleave', (event: any, d: any) => {
+      .on('mouseleave', (event: any, d: any): void => {
         this.handleMouseLeave(event, d);
       })
-      .on('click', (event: any, d: any) => {
+      .on('click', (event: any, d: any): void => {
         this.handleClick(event, d);
       });
   }
@@ -111,15 +114,19 @@ export class MapComponent implements OnInit {
     svg
       .selectAll('path')
       .filter((d: any) => this.selectedFeatures.has(d))
-      .style('fill', 'purple'); 
+      .style('fill', 'purple');
+  }
+
+  setFeatureFillColor(event: any, feature: FeatureModel): void {
+    const fillColor: string = this.getFeatureFillColor(feature);
+    d3.select(event.target).style('fill', fillColor);
   }
 
   handleMouseLeave(event: any, feature: FeatureModel): void {
     if (!this.selectedFeatures.has(feature)) {
       this.currentHoveredFeature = null;
     }
-    const fillColor = this.getFeatureFillColor(feature);
-    d3.select(event.target).style('fill', fillColor);
+    this.setFeatureFillColor(event, feature);
     this.showmodal.set(false);
   }
 
@@ -129,8 +136,7 @@ export class MapComponent implements OnInit {
     } else {
       this.selectedFeatures.add(feature);
     }
-    const fillColor = this.getFeatureFillColor(feature);
-    d3.select(event.target).style('fill', fillColor);
+    this.setFeatureFillColor(event, feature);
     this.cd.detectChanges();
   }
 
