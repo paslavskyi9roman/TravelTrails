@@ -52,25 +52,14 @@ export class MapComponent implements OnInit {
               featureIds.includes(feature.properties.name),
             ),
           );
-          const newData = this.transformSelectedFeaturesToMapDataModel(
-            this.selectedFeatures,
-          );
-          console.log('init with selected countries');
+
+          this.highlightSelectedFeatures();
         }
       });
     });
   }
 
-  transformSelectedFeaturesToMapDataModel(
-    selectedFeatures: Set<FeatureModel>,
-  ): MapDataModel {
-    const mapDataModel: MapDataModel = {
-      type: 'FeatureCollection',
-      features: Array.from(selectedFeatures.values()),
-    };
 
-    return mapDataModel;
-  }
 
   processData(data: MapDataModel): void {
     this.mapData = data;
@@ -105,18 +94,24 @@ export class MapComponent implements OnInit {
   }
 
   handleMouseEnter(event: any, feature: FeatureModel): void {
-    if (this.previousHoveredFeature !== feature) {
-      this.currentHoveredFeature = feature;
-      this.previousHoveredFeature = feature;
-    }
+    const { clientX: x, clientY: y, target } = event;
     this.currentHoveredFeature = feature;
-    d3.select(event.target).style('fill', 'orange');
-    this.eventPos.set({
-      x: event.clientX,
-      y: event.clientY,
-    });
+    this.highlightFeature(target);
+    this.eventPos.set({ x, y });
     this.cd.detectChanges();
     this.showmodal.set(true);
+  }
+
+  highlightFeature(target: SVGPathElement): void {
+    d3.select(target).style('fill', 'orange');
+  }
+
+  highlightSelectedFeatures(): void {
+    const svg = d3.select('#mapSvg');
+    svg
+      .selectAll('path')
+      .filter((d: any) => this.selectedFeatures.has(d))
+      .style('fill', 'purple'); 
   }
 
   handleMouseLeave(event: any, feature: FeatureModel): void {
