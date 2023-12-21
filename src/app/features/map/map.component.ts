@@ -4,7 +4,9 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   signal,
+  inject,
 } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
@@ -29,8 +31,11 @@ export class MapComponent implements OnInit {
   showmodal = signal(false);
   eventPos = signal({ x: 0, y: 0 });
   private previousHoveredFeature: FeatureModel;
+  private mapService = inject(MapService);
+  private cd = inject(ChangeDetectorRef);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  constructor(private mapService: MapService, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.getMapData();
@@ -110,5 +115,8 @@ export class MapComponent implements OnInit {
 
   isHovered(feature: FeatureModel): boolean {
     return feature === this.currentHoveredFeature && !this.selectedFeatures.has(feature);
+  }
+
+  shareList() {
   }
 }
