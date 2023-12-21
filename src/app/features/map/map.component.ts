@@ -6,7 +6,7 @@ import {
   signal,
   inject,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
@@ -33,9 +33,7 @@ export class MapComponent implements OnInit {
   private previousHoveredFeature: FeatureModel;
   private mapService = inject(MapService);
   private cd = inject(ChangeDetectorRef);
-  private router = inject(Router);
   private route = inject(ActivatedRoute);
-
 
   ngOnInit(): void {
     this.getMapData();
@@ -44,10 +42,26 @@ export class MapComponent implements OnInit {
   getMapData(): void {
     this.mapService.getMapData().subscribe((data: MapDataModel): void => {
       this.processData(data);
+      this.route.queryParams.subscribe((params) => {
+        const sharedCountries = params['selectedCountries'];
+
+        if (sharedCountries) {
+          const featureIds = sharedCountries.split(',');
+          this.selectedFeatures = new Set(
+            this.mapData.features.filter((feature: FeatureModel) =>
+              featureIds.includes(feature.properties.name),
+            ),
+          );
+
+          this.highlightSelectedFeatures();
+        }
+      });
     });
   }
 
-  processData(data: any): void {
+
+
+  processData(data: MapDataModel): void {
     this.mapData = data;
     const svg = d3.select('#mapSvg');
     const projection = d3
@@ -80,18 +94,24 @@ export class MapComponent implements OnInit {
   }
 
   handleMouseEnter(event: any, feature: FeatureModel): void {
-    if (this.previousHoveredFeature !== feature) {
-      this.currentHoveredFeature = feature;
-      this.previousHoveredFeature = feature;
-    }
+    const { clientX: x, clientY: y, target } = event;
     this.currentHoveredFeature = feature;
-    d3.select(event.target).style('fill', 'orange');
-    this.eventPos.set({
-      x: event.clientX,
-      y: event.clientY,
-    });
+    this.highlightFeature(target);
+    this.eventPos.set({ x, y });
     this.cd.detectChanges();
     this.showmodal.set(true);
+  }
+
+  highlightFeature(target: SVGPathElement): void {
+    d3.select(target).style('fill', 'orange');
+  }
+
+  highlightSelectedFeatures(): void {
+    const svg = d3.select('#mapSvg');
+    svg
+      .selectAll('path')
+      .filter((d: any) => this.selectedFeatures.has(d))
+      .style('fill', 'purple'); 
   }
 
   handleMouseLeave(event: any, feature: FeatureModel): void {
@@ -111,12 +131,22 @@ export class MapComponent implements OnInit {
     }
     const fillColor = this.getFeatureFillColor(feature);
     d3.select(event.target).style('fill', fillColor);
+    this.cd.detectChanges();
   }
 
   isHovered(feature: FeatureModel): boolean {
-    return feature === this.currentHoveredFeature && !this.selectedFeatures.has(feature);
+    return (
+      feature === this.currentHoveredFeature &&
+      !this.selectedFeatures.has(feature)
+    );
   }
 
-  shareList() {
+  resetMap(): void {
+    this.selectedFeatures = new Set();
+    this.mapService.getMapData().subscribe((data: MapDataModel): void => {
+      this.processData(data);
+      const svg = d3.select('#mapSvg');
+      svg.selectAll('path').style('fill', 'steelblue');
+    });
   }
 }
