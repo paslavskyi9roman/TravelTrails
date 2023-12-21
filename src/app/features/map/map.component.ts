@@ -6,7 +6,7 @@ import {
   signal,
   inject,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import * as d3 from 'd3';
 import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
@@ -33,9 +33,7 @@ export class MapComponent implements OnInit {
   private previousHoveredFeature: FeatureModel;
   private mapService = inject(MapService);
   private cd = inject(ChangeDetectorRef);
-  private router = inject(Router);
   private route = inject(ActivatedRoute);
-
 
   ngOnInit(): void {
     this.getMapData();
@@ -44,10 +42,39 @@ export class MapComponent implements OnInit {
   getMapData(): void {
     this.mapService.getMapData().subscribe((data: MapDataModel): void => {
       this.processData(data);
+      this.route.queryParams.subscribe((params) => {
+        const sharedCountries = params['selectedCountries'];
+  
+        if (sharedCountries) {
+          const featureIds = sharedCountries.split(',');
+          this.selectedFeatures = new Set(
+            this.mapData.features.filter((feature: FeatureModel) =>
+              featureIds.includes(feature.properties.name),
+            ),
+          );
+          const newData = this.transformSelectedFeaturesToMapDataModel(
+            this.selectedFeatures,
+          );
+          console.log('init with selected countries');
+          
+          
+        } 
+      });
     });
   }
 
-  processData(data: any): void {
+  transformSelectedFeaturesToMapDataModel(
+    selectedFeatures: Set<FeatureModel>,
+  ): MapDataModel {
+    const mapDataModel: MapDataModel = {
+      type: 'FeatureCollection',
+      features: Array.from(selectedFeatures.values()),
+    };
+
+    return mapDataModel;
+  }
+
+  processData(data: MapDataModel): void {
     this.mapData = data;
     const svg = d3.select('#mapSvg');
     const projection = d3
@@ -114,9 +141,16 @@ export class MapComponent implements OnInit {
   }
 
   isHovered(feature: FeatureModel): boolean {
-    return feature === this.currentHoveredFeature && !this.selectedFeatures.has(feature);
+    return (
+      feature === this.currentHoveredFeature &&
+      !this.selectedFeatures.has(feature)
+    );
   }
 
-  shareList() {
+  resetMap(): void {
+    this.selectedFeatures = new Set();
+    this.mapService.getMapData().subscribe((data: MapDataModel): void => {
+      this.processData(data);
+    });
   }
 }
