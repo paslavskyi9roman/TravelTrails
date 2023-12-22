@@ -7,7 +7,8 @@ import {
   inject,
   DestroyRef,
 } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import * as d3 from 'd3';
@@ -35,6 +36,7 @@ export class MapComponent implements OnInit {
   private mapService: MapService = inject(MapService);
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
   private route: ActivatedRoute = inject(ActivatedRoute);
+  private router: Router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
@@ -57,7 +59,7 @@ export class MapComponent implements OnInit {
                 featureIds.includes(feature.properties.name),
               ),
             );
-
+            this.router.navigate([]);
             this.highlightSelectedFeatures();
           }
         });
