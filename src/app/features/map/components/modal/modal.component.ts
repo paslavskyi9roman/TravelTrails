@@ -1,5 +1,4 @@
 import { Component, Input, effect, signal } from '@angular/core';
-import { FeatureModel } from 'src/app/models/feature.model';
 
 @Component({
   selector: 'app-modal',

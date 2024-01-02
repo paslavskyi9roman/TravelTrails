@@ -9,4 +9,4 @@ import { MapModule } from '../map/map.module';
   imports: [CommonModule, MapModule],
   exports: [LayoutComponent],
 })
-export class LayoutModule { }
+export class LayoutModule {}

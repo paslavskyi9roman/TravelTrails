@@ -9,18 +9,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { LayoutModule } from './features/layout/layout.module';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    AuthComponent,
-    HeaderComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    LayoutModule
-  ],
+  declarations: [AppComponent, AuthComponent, HeaderComponent],
+  imports: [BrowserModule, AppRoutingModule, HttpClientModule, LayoutModule],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

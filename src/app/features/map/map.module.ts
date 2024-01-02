@@ -8,9 +8,7 @@ import { ClickOutsideDirective } from 'src/app/directives/outsideClick.directive
 
 @NgModule({
   declarations: [MapComponent, ClickOutsideDirective],
-  imports: [
-    CommonModule, SelectedCountriesComponent, ModalComponent,
-  ],
-  exports: [MapComponent]
+  imports: [CommonModule, SelectedCountriesComponent, ModalComponent],
+  exports: [MapComponent],
 })
-export class MapModule { }
+export class MapModule {}

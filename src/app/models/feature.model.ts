@@ -1,8 +1,8 @@
-import { GeometryModel } from "./geometry.model";
-import { PropertiesModel } from "./properties.model";
-
 export interface FeatureModel {
-    type: string;
-    geometry: GeometryModel;
-    properties: PropertiesModel;
+  type: 'Feature';
+  geometry: GeoJSON.Geometry;
+  properties: {
+    [name: string]: string;
+  };
+  id?: string | number;
 }
