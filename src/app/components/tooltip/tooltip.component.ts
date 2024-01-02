@@ -19,5 +19,4 @@ export class TooltipComponent {
   hideTooltip(): void {
     this.isTooltipVisible = false;
   }
-
 }

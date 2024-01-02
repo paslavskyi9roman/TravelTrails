@@ -12,11 +12,12 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import * as d3 from 'd3';
-import { geoPath, GeoPath, GeoPermissibleObjects } from 'd3';
+import { geoPath, GeoPath } from 'd3';
 
 import { FeatureModel } from 'src/app/models/feature.model';
 import { MapDataModel } from 'src/app/models/map-data.model';
 import { MapService } from 'src/app/services/map.service';
+import { LocalStorageService } from 'src/app/services/local-storage.service';
 
 @Component({
   selector: 'app-map',
@@ -25,15 +26,16 @@ import { MapService } from 'src/app/services/map.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MapComponent implements OnInit {
-  mapData: any;
+  mapData: MapDataModel;
   width = 1800;
   height = 1200;
-  path: GeoPath<any, GeoPermissibleObjects> | null = null;
+  path: GeoPath | null = null;
   currentHoveredFeature: FeatureModel | null;
   selectedFeatures: Set<FeatureModel> = new Set();
-  showmodal = signal(false);
+  showModal = signal(false);
   eventPos = signal({ x: 0, y: 0 });
   private mapService: MapService = inject(MapService);
+  private localStorageService: LocalStorageService = inject(LocalStorageService);
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
   private route: ActivatedRoute = inject(ActivatedRoute);
   private router: Router = inject(Router);
@@ -51,17 +53,17 @@ export class MapComponent implements OnInit {
         this.processData(data);
         this.route.queryParams.subscribe((params: Params): void => {
           const sharedCountries = params['selectedCountries'];
+          const featureIds = sharedCountries.split(',');
 
           if (sharedCountries) {
-            const featureIds = sharedCountries.split(',');
             this.selectedFeatures = new Set(
-              this.mapData.features.filter((feature: FeatureModel) =>
-                featureIds.includes(feature.properties.name),
-              ),
+              this.mapData.features.filter((feature: FeatureModel) => featureIds.includes(feature.properties['name']))
             );
-            this.router.navigate([]);
-            this.highlightSelectedFeatures();
           }
+          this.localStorageService.saveData('selectedCountries', this.selectedFeatures);
+          this.router.navigate([]).then();
+          this.highlightSelectedFeatures();
+          this.cd.detectChanges();
         });
       });
   }
@@ -69,9 +71,7 @@ export class MapComponent implements OnInit {
   processData(data: MapDataModel): void {
     this.mapData = data;
     const svg = d3.select('#mapSvg');
-    const projection: d3.GeoProjection = d3
-      .geoMercator()
-      .fitSize([this.width, this.height], this.mapData);
+    const projection: d3.GeoProjection = d3.geoMercator().fitSize([this.width, this.height], this.mapData);
     this.path = geoPath().projection(projection);
 
     svg
@@ -79,32 +79,35 @@ export class MapComponent implements OnInit {
       .data(this.mapData.features)
       .enter()
       .append('path')
-      .attr('d', (d: any) => this.path!(d) as string)
-      .style('fill', (d: any) => this.getFeatureFillColor(d))
+      .attr('d', (d: FeatureModel) => this.path!(d) as string)
+      .style('fill', (d: FeatureModel) => this.getFeatureFillColor(d))
       .style('stroke', 'white')
       .style('stroke-width', '1px')
-      .on('mouseenter', (event: any, d: any): void => {
-        this.handleMouseEnter(event, d);
+      .on('mouseenter', (event: MouseEvent, d: FeatureModel): void => {
+        this.handleMouseEnter(event, d as FeatureModel);
       })
-      .on('mouseleave', (event: any, d: any): void => {
+      .on('mouseleave', (event: MouseEvent, d: FeatureModel): void => {
         this.handleMouseLeave(event, d);
       })
-      .on('click', (event: any, d: any): void => {
+      .on('click', (event: MouseEvent, d: FeatureModel): void => {
         this.handleClick(event, d);
       });
   }
 
   getFeatureFillColor(feature: FeatureModel): string {
-    return this.selectedFeatures.has(feature) ? 'purple' : 'steelblue';
+    return this.selectedFeatures.has(feature) ? 'green' : 'steelblue';
   }
 
-  handleMouseEnter(event: any, feature: FeatureModel): void {
+  handleMouseEnter(event: MouseEvent, feature: FeatureModel): void {
     const { clientX: x, clientY: y, target } = event;
-    this.currentHoveredFeature = feature;
-    this.highlightFeature(target);
-    this.eventPos.set({ x, y });
-    this.cd.detectChanges();
-    this.showmodal.set(true);
+
+    if (target instanceof SVGPathElement) {
+      this.currentHoveredFeature = feature;
+      this.highlightFeature(target);
+      this.eventPos.set({ x, y });
+      this.cd.detectChanges();
+      this.showModal.set(true);
+    }
   }
 
   highlightFeature(target: SVGPathElement): void {
@@ -115,46 +118,45 @@ export class MapComponent implements OnInit {
     const svg = d3.select('#mapSvg');
     svg
       .selectAll('path')
-      .filter((d: any) => this.selectedFeatures.has(d))
-      .style('fill', 'purple');
+      .filter(d => this.selectedFeatures.has(d as FeatureModel))
+      .style('fill', 'green');
   }
 
-  setFeatureFillColor(event: any, feature: FeatureModel): void {
+  setFeatureFillColor(event: MouseEvent, feature: FeatureModel): void {
     const fillColor: string = this.getFeatureFillColor(feature);
-    d3.select(event.target).style('fill', fillColor);
+
+    if (event.target) {
+      d3.select(event.target as d3.BaseType).style('fill', fillColor);
+    }
   }
 
-  handleMouseLeave(event: any, feature: FeatureModel): void {
+  handleMouseLeave(event: MouseEvent, feature: FeatureModel): void {
     if (!this.selectedFeatures.has(feature)) {
       this.currentHoveredFeature = null;
     }
     this.setFeatureFillColor(event, feature);
-    this.showmodal.set(false);
+    this.showModal.set(false);
   }
 
-  handleClick(event: any, feature: FeatureModel): void {
+  handleClick(event: MouseEvent, feature: FeatureModel): void {
     if (this.selectedFeatures.has(feature)) {
       this.selectedFeatures.delete(feature);
     } else {
       this.selectedFeatures.add(feature);
     }
     this.setFeatureFillColor(event, feature);
+    this.localStorageService.saveData('selectedCountries', this.selectedFeatures);
     this.cd.detectChanges();
   }
 
   isHovered(feature: FeatureModel): boolean {
-    return (
-      feature === this.currentHoveredFeature &&
-      !this.selectedFeatures.has(feature)
-    );
+    return feature === this.currentHoveredFeature && !this.selectedFeatures.has(feature);
   }
 
   resetMap(): void {
     this.selectedFeatures = new Set();
-    this.mapService.getMapData().subscribe((data: MapDataModel): void => {
-      this.processData(data);
-      const svg = d3.select('#mapSvg');
-      svg.selectAll('path').style('fill', 'steelblue');
-    });
+    this.localStorageService.clearData();
+    const svg = d3.select('#mapSvg');
+    svg.selectAll('path').style('fill', 'steelblue');
   }
 }

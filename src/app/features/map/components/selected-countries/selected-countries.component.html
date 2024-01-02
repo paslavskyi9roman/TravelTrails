@@ -1,8 +1,8 @@
 <h4>Selected Countries:</h4>
 <ul>
-  @for (country of selectedCountries; track country.properties.woe_id) {
+  @for (country of selectedCountries; track country.properties['woe_id']) {
   <li>
-    {{ country.properties.name }}
+    {{ country.properties['name'] }}
   </li>
   }
 </ul>

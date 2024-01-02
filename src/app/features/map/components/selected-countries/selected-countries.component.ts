@@ -18,15 +18,13 @@ export class SelectedCountriesComponent {
 
   shareList(): void {
     const selectedFeatureIds: string[] = Array.from(this.selectedCountries).map(
-      (feature: FeatureModel) => feature.properties.name,
+      (feature: FeatureModel) => feature.properties['name']
     );
     const queryParams: { selectedCountries: string } = {
       selectedCountries: selectedFeatureIds.join(','),
     };
 
-    const shareableLink: string = this.router
-      .createUrlTree([], { relativeTo: this.route, queryParams })
-      .toString();
+    const shareableLink: string = this.router.createUrlTree([], { relativeTo: this.route, queryParams }).toString();
 
     this.copyToClipboard(shareableLink);
   }
