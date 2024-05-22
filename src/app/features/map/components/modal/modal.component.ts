@@ -12,8 +12,8 @@ export class ModalComponent {
   @Input() eventPos = signal({ x: 0, y: 0 });
   @Input() data: any;
 
-  openModal() {
-    effect(() => {
+  openModal(): void {
+    effect((): void => {
       this.showModal.set(true);
     });
   }
