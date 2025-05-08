@@ -5,7 +5,7 @@ import { Component, Input, effect, signal } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './modal.component.html',
-  styleUrl: './modal.component.scss',
+  styleUrl: './modal.component.scss'
 })
 export class ModalComponent {
   @Input() showModal = signal(false);

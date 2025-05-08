@@ -6,10 +6,11 @@ import { Observable } from 'rxjs';
 import { MapDataModel } from '../models/map-data.model';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class MapService {
-  private url = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson';
+  private url =
+    'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson';
 
   constructor(private http: HttpClient) {}
 

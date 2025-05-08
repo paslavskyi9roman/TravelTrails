@@ -8,7 +8,7 @@ import { FeatureModel } from 'src/app/models/feature.model';
   standalone: true,
   imports: [],
   templateUrl: './selected-countries.component.html',
-  styleUrl: './selected-countries.component.scss',
+  styleUrl: './selected-countries.component.scss'
 })
 export class SelectedCountriesComponent {
   @Input() selectedCountries: Set<FeatureModel>;
@@ -21,10 +21,12 @@ export class SelectedCountriesComponent {
       (feature: FeatureModel) => feature.properties['name']
     );
     const queryParams: { selectedCountries: string } = {
-      selectedCountries: selectedFeatureIds.join(','),
+      selectedCountries: selectedFeatureIds.join(',')
     };
 
-    const shareableLink: string = this.router.createUrlTree([], { relativeTo: this.route, queryParams }).toString();
+    const shareableLink: string = this.router
+      .createUrlTree([], { relativeTo: this.route, queryParams })
+      .toString();
 
     this.copyToClipboard(shareableLink);
   }

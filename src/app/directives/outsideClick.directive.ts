@@ -8,7 +8,7 @@ import { Directive, ElementRef, EventEmitter, HostListener, Output } from '@angu
 ************************************************************************************************/
 
 @Directive({
-  selector: '[appClickOutside]',
+  selector: '[appClickOutside]'
 })
 export class ClickOutsideDirective {
   @Output()

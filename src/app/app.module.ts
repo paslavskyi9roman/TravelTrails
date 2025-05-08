@@ -12,6 +12,6 @@ import { LayoutModule } from './features/layout/layout.module';
   declarations: [AppComponent, AuthComponent, HeaderComponent],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule, LayoutModule],
   providers: [],
-  bootstrap: [AppComponent],
+  bootstrap: [AppComponent]
 })
 export class AppModule {}

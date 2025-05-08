@@ -7,6 +7,6 @@ import { MapModule } from '../map/map.module';
 @NgModule({
   declarations: [LayoutComponent],
   imports: [CommonModule, MapModule],
-  exports: [LayoutComponent],
+  exports: [LayoutComponent]
 })
 export class LayoutModule {}

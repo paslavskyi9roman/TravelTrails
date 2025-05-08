@@ -4,7 +4,7 @@ import { Component, Input, HostListener } from '@angular/core';
   selector: 'app-tooltip',
   templateUrl: './tooltip.component.html',
   styleUrls: ['./tooltip.component.scss'],
-  standalone: true,
+  standalone: true
 })
 export class TooltipComponent {
   @Input() content: string | undefined;

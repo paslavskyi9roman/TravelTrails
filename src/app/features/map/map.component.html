@@ -1,23 +1,8 @@
 <button (click)="resetMap()">Reset</button>
 <section class="map">
-  <svg id="mapSvg" [attr.width]="width" [attr.height]="height">
-    @for (feature of mapData.features; track feature?.id) {
-    <path
-      [attr.d]="path?.(feature)"
-      [class.hovered]="isHovered(feature)"
-      [class.clicked]="selectedFeatures.has(feature)"
-      (mouseenter)="handleMouseEnter($event, feature)"
-      (mouseleave)="handleMouseLeave($event, feature)"
-      (click)="handleClick($event, feature)"
-    ></path>
-    }
-  </svg>
+  <svg id="mapSvg" [attr.width]="width" [attr.height]="height"></svg>
 
   <!-- <app-tooltip [content]="currentHoveredFeature?.properties?.name" /> -->
   <app-selected-countries [selectedCountries]="selectedFeatures" />
-  <app-modal
-  [showModal]="showModal"
-  [eventPos]="eventPos"
-  [data]="currentHoveredFeature"
-  />
+  <app-modal [showModal]="showModal" [eventPos]="eventPos" [data]="currentHoveredFeature" />
 </section>

@@ -34,6 +34,8 @@ export class MapComponent implements OnInit {
   selectedFeatures: Set<FeatureModel> = new Set();
   showModal = signal(false);
   eventPos = signal({ x: 0, y: 0 });
+  visibleFeatures: FeatureModel[] = [];
+
   private mapService: MapService = inject(MapService);
   private localStorageService: LocalStorageService = inject(LocalStorageService);
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -50,12 +52,13 @@ export class MapComponent implements OnInit {
       .getMapData()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((data: MapDataModel): void => {
+        this.mapData = data;
         this.processData(data);
         this.route.queryParams.subscribe((params: Params): void => {
           const sharedCountries = params['selectedCountries'];
-          const featureIds = sharedCountries.split(',');
 
           if (sharedCountries) {
+            const featureIds = sharedCountries.split(',');
             this.selectedFeatures = new Set(
               this.mapData.features.filter((feature: FeatureModel) => featureIds.includes(feature.properties['name']))
             );
@@ -71,27 +74,68 @@ export class MapComponent implements OnInit {
   processData(data: MapDataModel): void {
     this.mapData = data;
     const svg = d3.select('#mapSvg');
+
+    svg.selectAll('path').remove();
+
     const projection: d3.GeoProjection = d3.geoMercator().fitSize([this.width, this.height], this.mapData);
     this.path = geoPath().projection(projection);
 
-    svg
-      .selectAll('path')
-      .data(this.mapData.features)
-      .enter()
-      .append('path')
-      .attr('d', (d: FeatureModel) => this.path!(d) as string)
-      .style('fill', (d: FeatureModel) => this.getFeatureFillColor(d))
-      .style('stroke', 'white')
-      .style('stroke-width', '1px')
-      .on('mouseenter', (event: MouseEvent, d: FeatureModel): void => {
-        this.handleMouseEnter(event, d as FeatureModel);
-      })
-      .on('mouseleave', (event: MouseEvent, d: FeatureModel): void => {
-        this.handleMouseLeave(event, d);
-      })
-      .on('click', (event: MouseEvent, d: FeatureModel): void => {
-        this.handleClick(event, d);
-      });
+    this.createSpatialIndex(this.mapData.features);
+
+    this.updateVisibleFeatures();
+
+    const featureGroup = svg.append('g').attr('class', 'features-group');
+
+    this.renderFeatures(featureGroup);
+  }
+
+  createSpatialIndex(features: FeatureModel[]): FeatureModel[] {
+    return features;
+  }
+
+  updateVisibleFeatures(): void {
+    this.visibleFeatures = this.mapData.features;
+    this.cd.detectChanges();
+  }
+
+  renderFeatures(container: d3.Selection<SVGGElement, unknown, HTMLElement, SVGGElement>): void {
+    requestAnimationFrame(() => {
+      const chunkSize = 100;
+      const features = this.mapData.features;
+
+      const processChunk = (startIndex: number): void => {
+        const endIndex = Math.min(startIndex + chunkSize, features.length);
+        const chunk = features.slice(startIndex, endIndex);
+
+        chunk.forEach(feature => {
+          container
+            .append('path')
+            .datum(feature)
+            .attr('d', d => this.path!(d) as string)
+            .style('fill', d => this.getFeatureFillColor(d))
+            .style('stroke', 'white')
+            .style('stroke-width', '1px')
+            .on('mouseenter', (event: MouseEvent, d: FeatureModel) => {
+              this.handleMouseEnter(event, d as FeatureModel);
+              this.cd.detectChanges();
+            })
+            .on('mouseleave', (event: MouseEvent, d: FeatureModel) => {
+              this.handleMouseLeave(event, d);
+              this.cd.detectChanges();
+            })
+            .on('click', (event: MouseEvent, d: FeatureModel) => {
+              this.handleClick(event, d);
+              this.cd.detectChanges();
+            });
+        });
+
+        if (endIndex < features.length) {
+          setTimeout(() => processChunk(endIndex), 0);
+        }
+      };
+
+      processChunk(0);
+    });
   }
 
   getFeatureFillColor(feature: FeatureModel): string {
@@ -105,7 +149,6 @@ export class MapComponent implements OnInit {
       this.currentHoveredFeature = feature;
       this.highlightFeature(target);
       this.eventPos.set({ x, y });
-      this.cd.detectChanges();
       this.showModal.set(true);
     }
   }
@@ -146,7 +189,6 @@ export class MapComponent implements OnInit {
     }
     this.setFeatureFillColor(event, feature);
     this.localStorageService.saveData('selectedCountries', this.selectedFeatures);
-    this.cd.detectChanges();
   }
 
   isHovered(feature: FeatureModel): boolean {
